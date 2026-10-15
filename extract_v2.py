@@ -3,19 +3,17 @@ import pandas as pd
 from collections import defaultdict
 
 PCAP = "network_attacks.pcap"
-WINDOW = 15  # koll 15 paquets = satr
+WINDOW = 15
 
-# El IPs mta3 el réseau
 ATTACKER = "192.168.56.104"
 VICTIMS = ["192.168.56.102", "192.168.56.103"]
 
 def get_label(dport, proto, src):
-    # Ken el source howa el attaquant = attaque
     is_attack = (src == ATTACKER)
     if proto == "ICMP":
         return "normal"
     if not is_attack:
-        return "normal"  # trafic eli mch mel attaquant = normal
+        return "normal"
     if dport == 22:
         return "bruteforce"
     if dport == 21 or dport == 6200:
@@ -28,7 +26,6 @@ print(f"Lecture de {PCAP} ...")
 packets = rdpcap(PCAP)
 print(f"Total paquets : {len(packets)}")
 
-# Njammaa el paquets 7asb connexion
 flows = defaultdict(list)
 for pkt in packets:
     if IP in pkt and TCP in pkt:
@@ -44,11 +41,8 @@ rows = []
 for key, pkts in flows.items():
     src, dst, dport, proto = key
     label = get_label(dport, proto, src)
-
-    # Feature direction : 1 = men attaquant (داخل l victime), 0 = 5arej
     direction = 1 if src == ATTACKER else 0
 
-    # N9assem l windows
     for i in range(0, len(pkts), WINDOW):
         chunk = pkts[i:i+WINDOW]
         if len(chunk) < 2:
